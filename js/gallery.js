@@ -64,26 +64,38 @@ const images = [
   },
 ];
 
-const galleryContainer = document.querySelector('.gallery');
+const galleryEl = document.querySelector('.gallery');
 
-const createGalleryItemMarkup = ({ preview, original, description }) => {
-  return `
-    <li class="gallery-item">
-      <a class="gallery-link" href="${original}" onclick="event.preventDefault()">
-        <img
-          class="gallery-image"
-          src="${preview}"
-          data-source="${original}"
-          alt="${description}"
-        />
-      </a>
-    </li>
-  `;
+const makeGalleryItem = ({ preview, original, description }) => {
+  const itemEl = document.createElement('li');
+  itemEl.classList.add('gallery-item');
+
+  const linkEl = document.createElement('a');
+  linkEl.classList.add('gallery-link');
+  linkEl.href = original;
+  linkEl.setAttribute('onclick', 'event.preventDefault()');
+
+  const imgEl = document.createElement('img');
+  imgEl.classList.add('gallery-image');
+  imgEl.src = preview;
+  imgEl.dataset.source = original;
+  imgEl.alt = description;
+
+  linkEl.appendChild(imgEl);
+  itemEl.appendChild(linkEl);
+
+  return itemEl;
 };
 
-const galleryMarkup = images.reduce(
-  (acc, item) => acc + createGalleryItemMarkup(item),
-  ''
-);
+const galleryItems = images.map(makeGalleryItem);
+galleryEl.append(...galleryItems);
 
-galleryContainer.innerHTML = galleryMarkup;
+document.querySelector('.gallery').addEventListener('click', function (event) {
+  event.preventDefault();
+  if (event.target.classList.contains('gallery-image')) {
+    const largeImageURL = event.target.dataset.source;
+    const instance = basicLightbox.create(`
+      <img src="${largeImageURL}" width="800" height="600">`)
+    instance.show();
+  }
+});
